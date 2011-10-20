@@ -14,7 +14,11 @@ DynWorker = (path = DynWorker.libpath) ->
   worker = new Worker(path)
   
   receive = (callback) ->
-    worker.onmessage = callback
+    worker.addEventListener "message", callback, false
+  
+  log = ->
+    receive (e) ->
+      console.log e.data
   
   send = (msg) ->
     worker.postMessage(msg)
@@ -37,6 +41,7 @@ DynWorker = (path = DynWorker.libpath) ->
   
   return {
     receive: receive
+    log: log
     send: send
     eval: weval
     inject: inject
