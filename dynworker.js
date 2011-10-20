@@ -1,10 +1,13 @@
 (function() {
   var DynWorker;
   self.onmessage = function(e) {
-    return self.postMessage("Gotcha: " + e.data);
+    switch (e.data['DynWorkerAction']) {
+      case 'eval':
+        return eval(e.data['code']);
+    }
   };
   DynWorker = function(path) {
-    var receive, send, worker;
+    var receive, runCode, send, worker;
     if (path == null) {
       path = "dynworker.js";
     }
@@ -15,10 +18,20 @@
     send = function(msg) {
       return worker.postMessage(msg);
     };
+    runCode = function(code) {
+      return send({
+        DynWorkerAction: 'eval',
+        code: code
+      });
+    };
     return {
       receive: receive,
-      send: send
+      send: send,
+      run: runCode
     };
+  };
+  DynWorker.send = function(msg) {
+    return self.postMessage(msg);
   };
   if (typeof window === "undefined") {
     self.DynWorker = DynWorker;
