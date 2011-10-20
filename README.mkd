@@ -58,39 +58,41 @@ The Code
 --------
 
 Enough talk already! Where's the code?
-    
-    // If the library is in the current dir and
-    // is named dynworker.js, this works:
-    var worker = new DynWorker();
-    
-    // Otherwise you need to specify a filename,
-    // but it needs to be on the same domain.
-    var worker = new DynWorker("/js/lib/dynworker.min.js");
-    
-    // You can also modify the default path once and for all:
-    DynWorker.path("path/to/dynworker.js");
-    var worker = new DynWorker();
-    
-    
-    // The function is namespaced under DynWorker.ns
-    // inside the worker.
-    worker.inject("funcName", function(arg1, arg2) {
-      var result = "Do something awesome here";
-      
-      return result;
-    });
-    
-    // The callback gets back the raw event
-    worker.receive(function(e) {
-      e.data; // Display and strike awe
-    });
-    
-    
-    // The #run function wraps the function call in a
-    // DynWorker.send() so the return value of the
-    // function is sent up.
-    worker.run("funcName", arg1, arg2);
-    
-    // Hence, these two are equivalent:
-    worker.run("funcName");
-    worker.eval("DynWorker.send(DynWorker.ns['funcName']());");
+
+```javascript
+// If the library is in the current dir and
+// is named dynworker.js, this works:
+var worker = new DynWorker();
+
+// Otherwise you need to specify a filename,
+// but it needs to be on the same domain.
+var worker = new DynWorker("/js/lib/dynworker.min.js");
+
+// You can also modify the default path once and for all:
+DynWorker.path("path/to/dynworker.js");
+var worker = new DynWorker();
+
+
+// The function is namespaced under DynWorker.ns
+// inside the worker.
+worker.inject("funcName", function(arg1, arg2) {
+  var result = "Do something awesome here";
+  
+  return result;
+});
+
+// The callback gets back the raw event
+worker.receive(function(e) {
+  e.data; // Display and strike awe
+});
+
+
+// The #run function wraps the function call in a
+// DynWorker.send() so the return value of the
+// function is sent up.
+worker.run("funcName", arg1, arg2);
+
+// Hence, these two are equivalent:
+worker.run("funcName");
+worker.eval("DynWorker.send(DynWorker.ns['funcName']());");
+```
