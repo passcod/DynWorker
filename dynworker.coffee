@@ -1,5 +1,6 @@
 self.onmessage = (e) ->
-  self.postMessage "Gotcha: "+e.data
+  switch e.data['DynWorkerAction']
+    when 'eval' then eval e.data['code']
 
 
 
@@ -12,11 +13,20 @@ DynWorker = (path = "dynworker.js") ->
   send = (msg) ->
     worker.postMessage(msg)
   
+  runCode = (code) ->
+    send {
+      DynWorkerAction: 'eval'
+      code: code
+    }
+  
   return {
     receive: receive
     send: send
+    run: runCode
   }
 
+DynWorker.send = (msg) ->
+  self.postMessage(msg)
 
 
 if typeof window == "undefined"

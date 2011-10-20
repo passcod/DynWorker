@@ -7,5 +7,14 @@
     <script src="http://localhost:8080/dynworker.js"></script>
   </head>
   <body>
+    <script>
+      var worker = new DynWorker();
+      worker.receive(function(e) {
+        var msg = JSON.stringify(e.data);
+        console.log(msg);
+        document.querySelector("#console").innerHTML += "\n"+msg;
+      });
+    </script>
+    <pre><code id="console"></code></pre>
   </body>
 </html>
