@@ -1,0 +1,50 @@
+/*
+  Taken from http://josscrowcroft.github.com/javascript-sandbox-console/
+  and modified a bit.
+*/
+
+.pln {
+    color: #FDF6E3;
+}
+.str {
+    color: #CB5B00;
+}
+.kwd {
+    color: #B4D455;
+}
+.com {
+    color: #839496;
+}
+.typ {
+    color: #FDF6E3;
+}
+.lit {
+    color: #FDF6E3;
+}
+.pun {
+    color: #93A1A1;
+}
+.opn {
+    color: #93A1A1;
+}
+.clo {
+    color: #93A1A1;
+}
+.tag {
+    color: #FDF6E3;
+}
+.atn {
+    color: #B58900;
+}
+.atv {
+    color: #CB4B16;
+}
+.dec {
+    color: #859900;
+}
+.var {
+    color: #859900;
+}
+.fun {
+    color: #FDF6E3;
+}
