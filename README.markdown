@@ -10,8 +10,8 @@ You no longer need to create a separate file for each different worker... the on
 extra file you will ever have to load is `dynworker.js`.
 
 DynWorker contains a few utilities to augment your worker. You can easily inject
-functions into the worker, run arbitrary code, and pass messages containing mixed
-data (everything is JSON-encoded).
+functions into the worker, run arbitrary code, pass messages containing mixed
+data (everything is JSON-encoded), and access DOM storage.
 
 Future developments may include being able to clone workers, access the DOM asynchronously,
 make full XHR requests (including XML parsing), access the indexedDB directly from
@@ -60,6 +60,20 @@ worker.run("funcName", arg1, arg2);
 // Hence, these two are equivalent:
 worker.run("funcName");
 worker.eval("DynWorker.send(DynWorker.ns['funcName']());");
+```
+
+### DOM storage
+
+The `DynWorker.localStorage` API mimics the `window.localStorage` API, minus
+the array-like interface. Under the hood, all calls are asynchronous, but it
+doesn't matter too much. All workers and the main thread use the same DOM
+storage. The `DynWorker.sessionStorage` API is the same.
+
+Inside the worker:
+
+```javascript
+DynWorker.localStorage.setItem("key", "data");
+var data = DynWorker.localStorage.getItem("key");
 ```
 
 

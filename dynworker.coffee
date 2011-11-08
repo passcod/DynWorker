@@ -1,19 +1,17 @@
 ###
-DynWorker is Copyright 2011- Félix "passcod" Saparelli
-and licensed under MIT: http://passcod.mit-license.org
+DynWorker is Copyright Félix "passcod" Saparelli
+ and licensed under MIT: http://mit.passcod.net
 ###
 
 "use strict";
 
-self.onmessage = (e) ->
-  switch e.data['DynWorkerAction']
-    when 'eval' then eval e.data['code']
-
-
 DynWorker = (path = DynWorker.libpath) ->
   worker = new Worker(path)
   
-  receive = (callback) ->
+  receive = (func) ->
+    callback = (e) ->
+      e.data = JSON.parse e.data
+      func e
     worker.addEventListener "message", callback, false
   
   log = ->
@@ -21,13 +19,19 @@ DynWorker = (path = DynWorker.libpath) ->
       console.log e.data
   
   send = (msg) ->
-    worker.postMessage(msg)
+    worker.postMessage(JSON.strinigfy msg)
+  
+  cmd = (action, args...) ->
+    msg = {DynWorkerAction: action, args: 0}
+    objAdd = (arg) ->
+      msg.args++
+      msg["arg#{msg.args}"] = arg
+    objAdd arg for arg in args
+    send msg
+    
   
   weval = (code) ->
-    send {
-      DynWorkerAction: 'eval'
-      code: code
-    }
+    cmd 'eval', code
   
   inject = (name, func) ->
     sfunc = func.toString()
@@ -43,6 +47,7 @@ DynWorker = (path = DynWorker.libpath) ->
     receive: receive
     log: log
     send: send
+    cmd: cmd
     eval: weval
     inject: inject
     run: run
@@ -52,13 +57,31 @@ DynWorker.ns = {}
 
 DynWorker.libpath = "dynworker.js"
 DynWorker.path = (path) ->
-  if path then DynWorker.libpath = path;
+  if path then DynWorker.libpath = path
+
+DynWorker.receive = (func) ->
+  callback = (e) ->
+    e.data = JSON.parse e.data
+    func e
+  self.addEventListener "message", callback, false
 
 DynWorker.send = (msg) ->
-  self.postMessage(msg)
+  self.postMessage(JSON.stringify msg)
+
+DynWorker.cmd = (action, args...) ->
+  msg = {DynWorkerAction: action, args: 0}
+  objAdd = (arg) ->
+    msg.args++
+    msg["arg#{msg.args}"] = arg
+  objAdd arg for arg in args
+  DynWorker.send msg
 
 
 if typeof window == "undefined"
   self.DynWorker = DynWorker
+  
+  DynWorker.receive (e) ->
+    switch e.data['DynWorkerAction']
+      when 'eval' then eval e.data['arg1']
 else
   window.DynWorker = DynWorker
