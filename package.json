@@ -1,6 +1,6 @@
 {
   "name": "DynWorker"
-  , "version": "1.1.0"
+  , "version": "1.2.0"
   
   , "description": "Web threading made easy - Ender shortcut"
   , "keywords": ["thread", "webworker", "worker", "ender"]
