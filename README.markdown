@@ -11,7 +11,7 @@ extra file you will ever have to load is `dynworker.js`.
 
 DynWorker contains a few utilities to augment your worker. You can easily inject
 functions into the worker, run arbitrary code, pass messages containing mixed
-data (everything is JSON-encoded), and access DOM storage.
+data (everything is JSON-encoded), and access DOM storage (local and session).
 
 Future developments may include being able to clone workers, access the DOM asynchronously,
 make full XHR requests (including XML parsing), access the indexedDB directly from
