@@ -11,8 +11,7 @@
       var worker = new DynWorker();
       worker.log();
       worker.receive(function(e) {
-        var msg = JSON.stringify(e.data);
-        document.querySelector("#console").innerHTML += "\n"+msg;
+        document.querySelector("#console").innerHTML += "\n"+e.data;
       });
     </script>
     <pre><code id="console"></code></pre>

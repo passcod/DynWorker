@@ -38,10 +38,15 @@ DynWorker.path("path/to/dynworker.js");
 var worker = new DynWorker();
 
 
-// The function is namespaced under DynWorker.ns
+// The function is namespaced under $.ns
 // inside the worker.
 worker.inject("funcName", function(arg1, arg2) {
   var result = "Do something awesome here";
+  
+  // In-worker helpers are namespaced under $
+  $.receive(function(e, data) {
+    // Receive messages from the main thread
+  });
   
   return result;
 });
@@ -54,27 +59,27 @@ worker.receive(function(e, data) {
 
 
 // The #run function wraps the function call in a
-// DynWorker.send() so the return value of the
+// $.send() so the return value of the
 // function is sent up.
 worker.run("funcName", arg1, arg2);
 
 // Hence, these two are equivalent:
 worker.run("funcName");
-worker.eval("DynWorker.send(DynWorker.ns['funcName']());");
+worker.eval("$.send($.ns['funcName']());");
 ```
 
 ### DOM storage
 
-The `DynWorker.localStorage` API mimics the `window.localStorage` API, minus
+The `$.localStorage` API mimics the `window.localStorage` API, minus
 the array-like interface. Under the hood, all calls are asynchronous, but it
 doesn't matter too much. All workers and the main thread use the same DOM
-storage. The `DynWorker.sessionStorage` API is the same.
+storage. The `$.sessionStorage` API is the same.
 
 Inside the worker:
 
 ```javascript
-DynWorker.localStorage.setItem("key", "data");
-DynWorker.localStorage.getItem("key", function(data) {
+$.localStorage.setItem("key", "data");
+$.localStorage.getItem("key", function(data) {
   // Getters are not implemented yet
 });
 ```

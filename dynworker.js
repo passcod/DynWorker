@@ -4,7 +4,7 @@
    and licensed under MIT: http://mit.passcod.net
   */
   "use strict";
-  var DynWorker;
+  var DynWorker, InWorker;
   var __slice = Array.prototype.slice;
   DynWorker = function(path) {
     var cmd, inject, log, receive, run, send, store, weval, worker;
@@ -53,12 +53,12 @@
       if (!/^function \(/.test(sfunc)) {
         sfunc.replace(/^function [^\(]+\(/, 'function (');
       }
-      return weval("DynWorker.ns['" + name + "']=" + sfunc + ";");
+      return weval("$.ns['" + name + "']=" + sfunc + ";");
     };
     run = function() {
       var args, name;
       name = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      return weval("DynWorker.send(DynWorker.ns['" + name + "'].apply(null, " + (JSON.stringify(args)) + "));");
+      return weval("$.send($.ns['" + name + "'].apply(null, " + (JSON.stringify(args)) + "));");
     };
     store = function(type, action, key, data) {
       switch (action) {
@@ -106,59 +106,72 @@
       return DynWorker.libpath = path;
     }
   };
-  DynWorker.ns = {};
-  DynWorker.receive = function(func) {
-    var callback;
-    callback = function(e) {
-      return func(e, JSON.parse(e.data));
+  InWorker = function() {
+    var cmd, receive, send, store;
+    receive = function(func) {
+      var callback;
+      callback = function(e) {
+        return func(e, JSON.parse(e.data));
+      };
+      return self.addEventListener("message", callback, false);
     };
-    return self.addEventListener("message", callback, false);
-  };
-  DynWorker.send = function(msg) {
-    return self.postMessage(JSON.stringify(msg));
-  };
-  DynWorker.cmd = function() {
-    var action, arg, args, msg, objAdd, _i, _len;
-    action = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    msg = {
-      DynWorkerAction: action,
-      args: 0
+    send = function(msg) {
+      return self.postMessage(JSON.stringify(msg));
     };
-    objAdd = function(arg) {
-      msg.args++;
-      return msg["arg" + msg.args] = arg;
+    cmd = function() {
+      var action, arg, args, msg, objAdd, _i, _len;
+      action = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      msg = {
+        DynWorkerAction: action,
+        args: 0
+      };
+      objAdd = function(arg) {
+        msg.args++;
+        return msg["arg" + msg.args] = arg;
+      };
+      for (_i = 0, _len = args.length; _i < _len; _i++) {
+        arg = args[_i];
+        objAdd(arg);
+      }
+      return send(msg);
     };
-    for (_i = 0, _len = args.length; _i < _len; _i++) {
-      arg = args[_i];
-      objAdd(arg);
-    }
-    return DynWorker.send(msg);
-  };
-  DynWorker.localStorage = {
-    setItem: function(key, data) {
-      return DynWorker.cmd('domstorage', 'local', 'set', key, data);
-    },
-    removeItem: function(key) {
-      return DynWorker.cmd('domstorage', 'local', 'remove', key);
-    },
-    clear: function() {
-      return DynWorker.cmd('domstorage', 'local', 'clear');
-    }
-  };
-  DynWorker.sessionStorage = {
-    setItem: function(key, data) {
-      return DynWorker.cmd('domstorage', 'session', 'set', key, data);
-    },
-    removeItem: function(key) {
-      return DynWorker.cmd('domstorage', 'session', 'remove', key);
-    },
-    clear: function() {
-      return DynWorker.cmd('domstorage', 'session', 'clear');
-    }
+    store = {
+      'local': {
+        setItem: function(key, data) {
+          return cmd('domstorage', 'local', 'set', key, data);
+        },
+        removeItem: function(key) {
+          return cmd('domstorage', 'local', 'remove', key);
+        },
+        clear: function() {
+          return cmd('domstorage', 'local', 'clear');
+        }
+      },
+      'session': {
+        setItem: function(key, data) {
+          return cmd('domstorage', 'session', 'set', key, data);
+        },
+        removeItem: function(key) {
+          return cmd('domstorage', 'session', 'remove', key);
+        },
+        clear: function() {
+          return cmd('domstorage', 'session', 'clear');
+        }
+      }
+    };
+    return {
+      ns: {},
+      receive: receive,
+      send: send,
+      cmd: cmd,
+      localStorage: store.local,
+      sessionStorage: store.session
+    };
   };
   if (typeof window === "undefined") {
     self.DynWorker = DynWorker;
-    DynWorker.receive(function(e, data) {
+    self.$ = new InWorker();
+    $.receive(function(e, data) {
       switch (data['DynWorkerAction']) {
         case 'eval':
           return eval(data['arg1']);

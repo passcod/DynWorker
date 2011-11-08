@@ -51,12 +51,12 @@ DynWorker = (path = DynWorker.libpath) ->
       sfunc.replace(/^function [^\(]+\(/, 'function (')
     
     # Namespace the function inside the worker
-    weval "DynWorker.ns['#{name}']=#{sfunc};"
+    weval "$.ns['#{name}']=#{sfunc};"
   
   # Run a function in the worker and pass it args
   run = (name, args...) ->
     # Send up what the function returns
-    weval "DynWorker.send(DynWorker.ns['#{name}'].apply(null, #{JSON.stringify args}));"
+    weval "$.send($.ns['#{name}'].apply(null, #{JSON.stringify args}));"
   
   # Use DOM Storage
   store = (type, action, key, data) ->
@@ -100,62 +100,61 @@ DynWorker.path = (path) ->
   if path then DynWorker.libpath = path
 
 
-# The following functions make up the in-worker API. They probably shouldn't
-# be defined here, but rather added when needed. For now it's OK, though.
 
-# Namespace for injected functions
-DynWorker.ns = {}
-
-# Receive a message from the parent (main) thread
-DynWorker.receive = (func) ->
-  callback = (e) ->
-    # Can't touch `e`, so use a second parameter
-    func e, JSON.parse e.data
-  self.addEventListener "message", callback, false
-
-# Send a message "up" (to the parent/main thread)
-DynWorker.send = (msg) ->
-  self.postMessage(JSON.stringify msg)
-
-# Send a command to the parent (main) thread. This works
-# the same as worker.cmd does in the main thread.
-DynWorker.cmd = (action, args...) ->
-  msg = {DynWorkerAction: action, args: 0}
-  objAdd = (arg) ->
-    msg.args++
-    msg["arg#{msg.args}"] = arg
-  objAdd arg for arg in args
-  DynWorker.send msg
-
-# Use DOM Storage from the worker. Everything is async,
-# and the getters take a callback method instead of returning.
-DynWorker.localStorage = {
-  setItem: (key, data) ->
-    DynWorker.cmd 'domstorage', 'local', 'set', key, data
+InWorker = ->
+  # Receive a message from the parent (main) thread
+  receive = (func) ->
+    callback = (e) ->
+      # Can't touch `e`, so use a second parameter
+      func e, JSON.parse e.data
+    self.addEventListener "message", callback, false
   
-  removeItem: (key) ->
-    DynWorker.cmd 'domstorage', 'local', 'remove', key
+  # Send a message "up" (to the parent/main thread)
+  send = (msg) ->
+    self.postMessage(JSON.stringify msg)
   
-  clear: ->
-    DynWorker.cmd 'domstorage', 'local', 'clear'
-}
-DynWorker.sessionStorage = {
-  setItem: (key, data) ->
-    DynWorker.cmd 'domstorage', 'session', 'set', key, data
+  # Send a command to the parent (main) thread. This works
+  # the same as worker.cmd does in the main thread.
+  cmd = (action, args...) ->
+    msg = {DynWorkerAction: action, args: 0}
+    objAdd = (arg) ->
+      msg.args++
+      msg["arg#{msg.args}"] = arg
+    objAdd arg for arg in args
+    send msg
   
-  removeItem: (key) ->
-    DynWorker.cmd 'domstorage', 'session', 'remove', key
+  # Use DOM Storage from the worker. Everything is async,
+  # and the getters take a callback method instead of returning.
+  store = {
+    'local': {
+      setItem: (key, data) -> cmd 'domstorage', 'local', 'set', key, data
+      removeItem: (key) -> cmd 'domstorage', 'local', 'remove', key
+      clear: -> cmd 'domstorage', 'local', 'clear'
+    }, 'session': {
+      setItem: (key, data) -> cmd 'domstorage', 'session', 'set', key, data
+      removeItem: (key) -> cmd 'domstorage', 'session', 'remove', key
+      clear: -> cmd 'domstorage', 'session', 'clear'
+    }
+  }
   
-  clear: ->
-    DynWorker.cmd 'domstorage', 'session', 'clear'
-}
+  
+  return {
+    ns: {} # Namespace for injected functions
+    receive: receive
+    send: send
+    cmd: cmd
+    localStorage: store.local
+    sessionStorage: store.session
+  }
 
 
 if typeof window == "undefined"
   # This is a worker
   self.DynWorker = DynWorker
   
-  DynWorker.receive (e, data) ->
+  self.$ = new InWorker();
+  
+  $.receive (e, data) ->
     switch data['DynWorkerAction']
       when 'eval' then eval data['arg1']
 else
