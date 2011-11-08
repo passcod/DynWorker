@@ -11,8 +11,6 @@
     "url": "https://github.com/passcod/DynWorker.git"
   }
   
-  , "directories": {"man": "man"}
-  
   , "ender": "ender/ender.js"
   , "main":  "ender/main.js"
 }
