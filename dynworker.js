@@ -61,7 +61,14 @@
       return weval("$.send($.ns['" + name + "'].apply(null, " + (JSON.stringify(args)) + "));");
     };
     store = function(type, action, key, data) {
+      var val;
       switch (action) {
+        case 'key':
+          val = type === 'local' ? window.localStorage.key(key) : window.sessionStorage.key(key);
+          return cmd('callback', data, [val]);
+        case 'get':
+          val = type === 'local' ? window.localStorage.getItem(key) : window.sessionStorage.getItem(key);
+          return cmd('callback', data, [val]);
         case 'set':
           if (type === 'local') {
             return window.localStorage.setItem(key, data);
@@ -107,7 +114,11 @@
     }
   };
   InWorker = function() {
-    var cmd, receive, send, store;
+    var callbacks, cmd, deepCallback, receive, send, store;
+    callbacks = [];
+    deepCallback = function(index, arguments_array) {
+      return callbacks[index].apply(null, arguments_array);
+    };
     receive = function(func) {
       var callback;
       callback = function(e) {
@@ -135,37 +146,37 @@
       }
       return send(msg);
     };
-    store = {
-      'local': {
+    store = function(scope) {
+      return {
+        key: function(index, callback) {
+          var i;
+          i = callbacks.push(callback);
+          return cmd('domstorage', scope, 'key', index, i - 1);
+        },
+        getItem: function(key, callback) {
+          var i;
+          i = callbacks.push(callback);
+          return cmd('domstorage', scope, 'get', key, i - 1);
+        },
         setItem: function(key, data) {
-          return cmd('domstorage', 'local', 'set', key, data);
+          return cmd('domstorage', scope, 'set', key, data);
         },
         removeItem: function(key) {
-          return cmd('domstorage', 'local', 'remove', key);
+          return cmd('domstorage', scope, 'remove', key);
         },
         clear: function() {
-          return cmd('domstorage', 'local', 'clear');
+          return cmd('domstorage', scope, 'clear');
         }
-      },
-      'session': {
-        setItem: function(key, data) {
-          return cmd('domstorage', 'session', 'set', key, data);
-        },
-        removeItem: function(key) {
-          return cmd('domstorage', 'session', 'remove', key);
-        },
-        clear: function() {
-          return cmd('domstorage', 'session', 'clear');
-        }
-      }
+      };
     };
     return {
       ns: {},
       receive: receive,
       send: send,
       cmd: cmd,
-      localStorage: store.local,
-      sessionStorage: store.session
+      callback: deepCallback,
+      localStorage: store('local'),
+      sessionStorage: store('session')
     };
   };
   if (typeof window === "undefined") {
@@ -174,7 +185,9 @@
     $.receive(function(e, data) {
       switch (data['DynWorkerAction']) {
         case 'eval':
-          return eval(data['arg1']);
+          return eval(data.arg1);
+        case 'callback':
+          return $.callback(data.arg1, data.arg2);
       }
     });
   } else {

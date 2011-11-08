@@ -11,7 +11,7 @@ extra file you will ever have to load is `dynworker.js`.
 
 DynWorker contains a few utilities to augment your worker. You can easily inject
 functions into the worker, run arbitrary code, pass messages containing mixed
-data (everything is JSON-encoded), and access DOM storage (setters only atm).
+data (everything is JSON-encoded), and access DOM storage.
 
 Future developments may include being able to clone workers, access the DOM asynchronously,
 make full XHR requests (including XML parsing), access the indexedDB directly from
@@ -80,7 +80,7 @@ Inside the worker:
 ```javascript
 $.localStorage.setItem("key", "data");
 $.localStorage.getItem("key", function(data) {
-  // Getters are not implemented yet
+  // Do something with that data
 });
 ```
 

@@ -61,6 +61,20 @@ DynWorker = (path = DynWorker.libpath) ->
   # Use DOM Storage
   store = (type, action, key, data) ->
     switch action
+      when 'key'
+        val = if type is 'local'
+          window.localStorage.key key
+        else
+          window.sessionStorage.key key
+        cmd 'callback', data, [val]
+      
+      when 'get'
+        val = if type is 'local'
+          window.localStorage.getItem key
+        else
+          window.sessionStorage.getItem key
+        cmd 'callback', data, [val]
+      
       when 'set'
         if type is 'local'
           window.localStorage.setItem key, data
@@ -102,6 +116,13 @@ DynWorker.path = (path) ->
 
 
 InWorker = ->
+  # Hold callbacks here for doubly asynchronous processes
+  callbacks = []
+  
+  # Run a callback stored above
+  deepCallback = (index, arguments_array) ->
+    callbacks[index].apply null, arguments_array
+  
   # Receive a message from the parent (main) thread
   receive = (func) ->
     callback = (e) ->
@@ -125,17 +146,18 @@ InWorker = ->
   
   # Use DOM Storage from the worker. Everything is async,
   # and the getters take a callback method instead of returning.
-  store = {
-    'local': {
-      setItem: (key, data) -> cmd 'domstorage', 'local', 'set', key, data
-      removeItem: (key) -> cmd 'domstorage', 'local', 'remove', key
-      clear: -> cmd 'domstorage', 'local', 'clear'
-    }, 'session': {
-      setItem: (key, data) -> cmd 'domstorage', 'session', 'set', key, data
-      removeItem: (key) -> cmd 'domstorage', 'session', 'remove', key
-      clear: -> cmd 'domstorage', 'session', 'clear'
+  store = (scope) ->
+    return {
+      key: (index, callback) ->
+        i = callbacks.push callback
+        cmd 'domstorage', scope, 'key', index, i-1
+      getItem: (key, callback) ->
+        i = callbacks.push callback
+        cmd 'domstorage', scope, 'get', key, i-1
+      setItem: (key, data) -> cmd 'domstorage', scope, 'set', key, data
+      removeItem: (key) -> cmd 'domstorage', scope, 'remove', key
+      clear: -> cmd 'domstorage', scope, 'clear'
     }
-  }
   
   
   return {
@@ -143,8 +165,9 @@ InWorker = ->
     receive: receive
     send: send
     cmd: cmd
-    localStorage: store.local
-    sessionStorage: store.session
+    callback: deepCallback
+    localStorage: store('local')
+    sessionStorage: store('session')
   }
 
 
@@ -156,7 +179,8 @@ if typeof window == "undefined"
   
   $.receive (e, data) ->
     switch data['DynWorkerAction']
-      when 'eval' then eval data['arg1']
+      when 'eval' then eval data.arg1
+      when 'callback' then $.callback data.arg1, data.arg2
 else
   # This is the main thread
   window.DynWorker = DynWorker
