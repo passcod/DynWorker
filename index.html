@@ -98,18 +98,58 @@ $.localStorage.key(index, function(key) {
   // ...
 });</pre>
     
+    <h2>WebSockets</h2>
+    <p>In Chrome, you can access WebSockets directly from the worker, just like you would from
+    the main thread.</p>
+    <pre>var mySocket = new WebSocket("...");
+mySocket.send(...);
+mySocket.onmessage = ...;</pre>
+    <p>In Firefox, WebSockets are not yet available to WebWorkers, so I am developing an helper
+    just like for DOM Storage. Note this does not work yet, and the API may change:</p>
+    <pre>$.WebSocket.open(url, protocol, function(socket_id) {
+  // The socket_id is precious, don't lose it, don't overwrite it
+  
+  $.WebSocket.send(socket_id, "some data");
+  
+  $.WebSocket.receive(socket_id, function(data) {
+    // Realtime data from the server!
+  });
+  
+  $.WebSocket.close(socket_id);
+});</pre>
+    
+    <h3>Socket.IO</h3>
+    <p>The first core plugin is in development right now! You will be able to use Socket.IO
+    directly from workers using an API closely matching the original one:</p>
+    <pre>$.io.connect('http://localhost', function(socket_id) {
+  var socket = $.io(socket_id);
+  
+  socket.on('news', function (data) {
+    $.send('Log: '+data);
+    socket.emit('my other event', {my: 'data'});
+  });
+});</pre>
+    
     <h1>More info...</h1>
     <p>You can read the source and have a look at the current state of things on
     <a href="https://github.com/passcod/DynWorker">GitHub</a>, or fork the repo if
     you want to hack around. A few features are in the works, at varying degrees
     of completion:</p>
     <ul>
-      <li>Clone workers</li>
-      <li>Access (a subset of) the DOM asynchronously</li>
-      <li>Perform full XHR requests (incl. XML processing, etc)</li>
-      <li>Access indexedDB</li>
-      <li>Serialize and unserialize workers</li>
-      <li>Access WebSockets</li>
+      <li>Clone workers
+      (Bug <a href="https://github.com/passcod/DynWorker/issues/4">#4</a>)</li>
+      <li>Access (a subset of) the DOM asynchronously
+      (Bug <a href="https://github.com/passcod/DynWorker/issues/3">#3</a>) (Branch <code>feature-asyncdom</code>)</li>
+      <li>Perform full XHR requests (incl. XML processing, etc)
+      (Bug <a href="https://github.com/passcod/DynWorker/issues/6">#6</a>)</li>
+      <li>Access indexedDB
+      (Bug <a href="https://github.com/passcod/DynWorker/issues/2">#2</a>) (Branch <code>feature-indexeddb</code>)</li>
+      <li>Serialize and unserialize workers
+      (Bug <a href="https://github.com/passcod/DynWorker/issues/5">#5</a>)</li>
+      <li>Access WebSockets on Firefox 7
+      (Bug <a href="https://github.com/passcod/DynWorker/issues/7">#7</a>) (Branch <code>feature-websockets</code>)</li>
+      <li>Access Socket.io (plugin)
+      (Bug <a href="https://github.com/passcod/DynWorker/issues/8">#8</a>)</li>
     </ul>
     <p>DynWorker is licensed under <a href="http://mit.passcod.net">this MIT license</a>.</p>
     <p>The headers' font is <a href="http://www.google.com/webfonts/specimen/Passero+One">Passero One</a>
