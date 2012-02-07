@@ -8,9 +8,6 @@
     <link rel="stylesheet" href="demo/prettyprint.css" />
     <link rel="stylesheet" href="demo/sandbox.css" />
     <script src="dynworker.js"></script>
-    <script>
-      var worker = new DynWorker();
-    </script>
   </head>
   <body>
     <header>
@@ -19,141 +16,9 @@
     </header>
     <div id="sandbox">sandbox loading...</div>
     <article>
-      <p>The above <a href="http://josscrowcroft.github.com/javascript-sandbox-console/">sandbox</a>
-      is already set up with a worker that logs all non-command messages to the sandbox. Try:</p>
-      <pre class="prettyprint">worker.eval("$.send('Hello Worker');");</pre>
-      
-      <h1>Creating</h1>
-      <p>To create a worker, you first have to set the path to the <code>dynworker.js</code>
-      file. By default it's <code>./dynworker.js</code>. Then simply call the constructor:</p>
-      <pre>DynWorker.path("path/to/dynworker.js");
-var worker = new DynWorker();</pre>
-      
-      <h1>Receiving messages</h1>
-      <p>To actually see what your worker is doing, you have to set up one or more receivers.
-      When the worker sends a message "up" (to the main thread), it can either be a command
-      or an arbitrary method. You get access to both, so you can debug easily, but you probably
-      only want to listen to the interesting ones.</p>
-      <pre>worker.receive(function (e, data) {
-  // `e` is the raw event, mostly for debugging purposes
-  // `data` is the actual message
-  
-  if (!data['DynWorkerAction']) {
-    // If `data` has the `DynWorkerAction` property set,
-    // it's a command. Discard it.
     
-    console.log(data);
-  }
-});</pre>
-      <h2>Debugging</h2>
-      <p>There's a shortcut which sets up a receiver that logs all messages to the console:</p>
-      <pre>worker.log();</pre>
-      
-      <h1>Injecting a function</h1>
-      <p>To add logic to a worker, you can inject functions. These can be named or anonymous, but
-      their name will be ripped anyway and replaced by the one specified when calling <code>inject()</code>.
-      In-worker, they are stored and namespaced under <code>$.ns</code> (see example below for recursion).</p>
-      <pre>// A rather inefficient implementation of Fibonnacci
-worker.inject("fib", function(n) {
-  if (n<=0) return 0;
-  if (n==1) return 1;
-  return $.ns.fib(n-1) + $.ns.fib(n-2);
-});</pre>
-      
-      <h1>Running code</h1>
-      <p>To run code in-worker from the main thread, you just have to call <code>worker.eval()</code>:</p>
-      <pre>worker.eval("doSomething();");</pre>
-      <h2>Injected functions</h2>
-      <p>You can easily run a function you've previously injected, optionally passing in arguments:</p>
-      <pre>worker.run("fib", 35);</pre>
-      <p>This is (more or less) equivalent to:</p>
-      <pre>worker.eval("$.send($.ns['fib'](35));");</pre>
-      <p>The return value of the function will be sent "up" to the main thread.</p>
-      
-      <h1>In-worker helpers</h1>
-      <p>In the worker, a number of helpers are provided under the <code>$</code> namespace:</p>
-      <pre>$.send("message"); // Send a message "up" to the main/parent thread
-
-$.receive(function(e, data) {
-  // Similar to the worker.receive method, this
-  // helper receives messages from the main thread
-});
-
-// These are only used internally:
-$.cmd(action, args...);
-$.callback(index, arg_array);</pre>
-      <h2>DOM Storage</h2>
-      <p>You can access the <code>localStorage</code> and <code>sessionStorage</code> objects
-      using an async API similar (but not identical) to the native one:</p>
-      <pre>// Setters:
-$.localStorage.setItem(key, data);
-$.sessionStorage.removeItem(key);
-$.localStorage.clear();
-
-// Getters:
-$.sessionStorage.getItem(key, function(val) {
-  // ...
-});
-$.localStorage.key(index, function(key) {
-  // ...
-});</pre>
-    
-    <h2>WebSockets</h2>
-    <p>In Chrome, you can access WebSockets directly from the worker, just like you would from
-    the main thread.</p>
-    <pre>var mySocket = new WebSocket("...");
-mySocket.send(...);
-mySocket.onmessage = ...;</pre>
-    <p>In Firefox, WebSockets are not yet available to WebWorkers, so I am developing an helper
-    just like for DOM Storage. Note this does not work yet, and the API may change:</p>
-    <pre>$.WebSocket.open(url, protocol, function(socket_id) {
-  // The socket_id is precious, don't lose it, don't overwrite it
-  
-  $.WebSocket.send(socket_id, "some data");
-  
-  $.WebSocket.receive(socket_id, function(data) {
-    // Realtime data from the server!
-  });
-  
-  $.WebSocket.close(socket_id);
-});</pre>
-    
-    <h3>Socket.IO</h3>
-    <p>The first core plugin is in development right now! You will be able to use Socket.IO
-    directly from workers using an API closely matching the original one:</p>
-    <pre>$.io.connect('http://localhost', function(socket_id) {
-  var socket = $.io(socket_id);
-  
-  socket.on('news', function (data) {
-    $.send('Log: '+data);
-    socket.emit('my other event', {my: 'data'});
-  });
-});</pre>
-    
-    <h1>More info...</h1>
-    <p>You can read the source and have a look at the current state of things on
-    <a href="https://github.com/passcod/DynWorker">GitHub</a>, or fork the repo if
-    you want to hack around. A few features are in the works, at varying degrees
-    of completion:</p>
-    <ul>
-      <li>Clone workers
-      (Bug <a href="https://github.com/passcod/DynWorker/issues/4">#4</a>)</li>
-      <li>Access (a subset of) the DOM asynchronously
-      (Bug <a href="https://github.com/passcod/DynWorker/issues/3">#3</a>) (Branch <code>feature-asyncdom</code>)</li>
-      <li>Perform full XHR requests (incl. XML processing, etc)
-      (Bug <a href="https://github.com/passcod/DynWorker/issues/6">#6</a>)</li>
-      <li>Access indexedDB
-      (Bug <a href="https://github.com/passcod/DynWorker/issues/2">#2</a>) (Branch <code>feature-indexeddb</code>)</li>
-      <li>Serialize and unserialize workers
-      (Bug <a href="https://github.com/passcod/DynWorker/issues/5">#5</a>)</li>
-      <li>Access WebSockets on Firefox 7
-      (Bug <a href="https://github.com/passcod/DynWorker/issues/7">#7</a>) (Branch <code>feature-websockets</code>)</li>
-      <li>Access Socket.io (plugin)
-      (Bug <a href="https://github.com/passcod/DynWorker/issues/8">#8</a>)</li>
-    </ul>
-    <p>DynWorker is licensed under <a href="http://mit.passcod.net">this MIT license</a>.</p>
-    <p>The headers' font is <a href="http://www.google.com/webfonts/specimen/Passero+One">Passero One</a>
-    by Viktoriya Grabowska.</p>
+      <p>The headers' font is <a href="http://www.google.com/webfonts/specimen/Passero+One">Passero One</a>
+      by Viktoriya Grabowska.</p>
     </article>
     
     
@@ -185,14 +50,6 @@ mySocket.onmessage = ...;</pre>
 			    el : $('#sandbox'),
 			    model : new Sandbox.Model(),
 			    tabCharacter: '  '
-		    });
-		    
-		    worker.receive(function(e, data) {
-		      if (data['DynWorkerAction']) return;
-		      sandbox.model.addHistory({
-		        command: 'Message from worker: ',
-		        result: data
-		      });
 		    });
 		    
 		    $('article pre:not(.no-prettyprint)').addClass('prettyprint');
