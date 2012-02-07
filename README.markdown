@@ -3,14 +3,15 @@ DynWorker
 
 **DynWorker** is a lowish-level library designed to make threading fun.
 
-## The Five Pillars
+## The Five-or-so Pillars
 
     DynWorker.file = '/dynworker.min.js';
     var thread = new DynWorker;
 
 You do not need to specify a file anymore. You specify once which file
 contains **DynWorker**, and we use that. A requirement, however, is that
-this file should not be concatenated unless you know exactly what you're doing.
+this file should not be concatenated with anything else unless you know
+exactly what you're doing.
 
 ---
 
@@ -18,7 +19,7 @@ this file should not be concatenated unless you know exactly what you're doing.
     thread.destroy(true);
 
 You can destroy a Worker at any time. The first version will tell the worker
-to commit seppuku, while the second just guillotines them on-the-spot.
+to commit seppuku, while the second just guillotines it on-the-spot.
 
 ---
 
@@ -46,17 +47,17 @@ You can `pull` a variable from the worker at any time. This is the inverse of
 
 ---
 
-    thread.listen(function (msg) {});
-
-You can listen for messages from the worker. All internal messages are filtered
-out, so you only get the good stuff.
-
----
-
     thread.run('func_name', args...);
 
 You can easily `run` a function in the worker and pass arguments. The arguments
 are also restricted by the list above.
+
+---
+
+    thread.listen(function (msg) {});
+
+You can listen for messages from the worker. All internal messages are filtered
+out, so you only get the good stuff.
 
 ---
 
@@ -67,7 +68,7 @@ You can `eval` code in the worker.
 ---
 
 All these methods are also available from within a worker on the special
-`parent_thread` global. The reverse the roles and allow data and code to be pushed,
+`parent_thread` global. They reverse the roles and allow data and code to be pushed,
 pulled, ran, and evaluated in the parent thread _from the worker_. (This is
 potentially very dangerous if you allow unchecked code to run within a worker.
 So don't.)
@@ -96,7 +97,7 @@ code and use them in another, for one. Awesome, right?
 
 Oh wow: we've selected an empty set, created six workers, and gave them the
 class `furry`. Similarly, you can `add` existing workers to a set, `remove`
-matching workers, or even `destroy` them:
+matching workers, and get a single worker from the lot:
 
     // Add...
     Workers('.furry').add(a_thread)...
@@ -105,6 +106,9 @@ matching workers, or even `destroy` them:
     // Remove...
     Workers('.furry').remove(a_thread)...
     Workers('.furry').remove('.rodents')...
+    
+    // Get the first non-rodent furry...
+    Workers('.furry').remove('.rodents').get(0);
     
     // This is a mice trap:
     Workers('.furry.rodents').destroy();
