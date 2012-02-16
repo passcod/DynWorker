@@ -14,8 +14,17 @@ h1, h2, h3 {
   text-shadow: 1px -1px 0 #666666;
 }
 
+h1 {
+  position: relative;
+  left: -1em;
+}
+
+h1:before {
+  content: '> ';
+}
+
 h2 {
-  font-size: 2em;
+  font-size: 1.8em;
 }
 
 h3 {

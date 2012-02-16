@@ -16,7 +16,108 @@
     </header>
     <div id="sandbox">sandbox loading...</div>
     <article>
-    
+      <p>The above <a href="http://josscrowcroft.github.com/javascript-sandbox-console/">sandbox</a>
+      is already set up with the correct <code>dynworker.js</code> path, so you can just dive in.</p>
+      <p>Be aware that there's some functions documented below that are not implemted yet.</p>
+      
+      <h1>Single-player Pong</h1>
+      <h2>Creating</h2>
+      <p>To create a worker, use the <code>DynWorker</code> object:</p>
+      <pre>var thread = new DynWorker;</pre>
+      <p>For now, you'll need to keep track of that variable, but we'll see how you can forgo that
+      later on with more advanced tricks.</p>
+      <h2>Destroying</h2>
+      <p>There's two ways of destroying a worker. You can politely ask it to commit seppuku or you
+      can just put it under the guillotine...</p>
+      <pre>thread.destroy();
+thread.destroy(true);</pre>
+      <h2>Pushing &amp; Pulling</h2>
+      <p>You can actively push &amp; pull data to &amp; from the worker. Data
+      is defined as being any JSON type plus functions. Functions within objects
+      are not yet supported.</p>
+      <pre>thread.push('name', 'data');</pre>
+      <p>The <code>'name'</code> is where the data will be stored (which is just
+      straight on the in-worker global object: <code>self</code>).</p>
+      <p>Pulling works the same way, and it takes a function which is passed
+      the pulled data.</p>
+      <pre>thread.pull('name', function (data) {});</pre>
+      <p>Everything is asynchronous, but this is inter-thread communication, so it's
+      not like you're ever going to notice anything below near-instantaneous speeds.</p>
+      <h2>Running a function</h2>
+      <p>After you've pushed a function into the worker, you can call it from the
+      parent thread and pass in arguments. The same restrictions as <code>push</code>
+      applies to the arguments, so be wary.</p>
+      <pre>thread.run('func_name', args...);</pre>
+      <h2>Listen for messages</h2>
+      <p>This will filter all internal communications, so it won't break your
+      algos with weird looking data.</p>
+      <pre>thread.listen(function (msg) {});</pre>
+      <p>You can bind as many functions as you need or want to; they'll all get
+      the same messages.</p>
+      <h2>Eval shit</h2>
+      <pre>thread.eval('code');</pre>
+      <p>That just runs <code>eval</code> inside the worker. No frills. No checks.
+      You're on your own.</p>
+      <h2>Reverse psycho</h2>
+      <p>All these methods are also available from within a worker on the special
+      <code>parent_thread</code> global. They reverse the roles and allow data and
+      code to be pushed, pulled, ran, and evaluated in the parent thread from the
+      worker. (This is potentially very dangerous if you allow unchecked code to
+      run within a worker. So don't.)</p>
+      
+      <h1>The lim(x→∞) workers</h1>
+      <p>Things start to get interesting when you get to use multiple
+      workers at the same time. You do this using "classes" and the awesome
+      <code>Workers</code> object.</p>
+      <h2>Simple grouping</h2>
+      <p>A basic example uses the <code>Worker</code> object to group three
+      existing workers together and push the same data to all of them in one go:</p>
+      <pre>var groupies = Workers(thread1, thread2, thread3);
+groupies.push('name', ['some', 'data', 'here']);</pre>
+      <h2>Classification</h2>
+      <p>You can assign class(es) to specific workers, and act upon all
+      workers with that class. It makes for some interesting uses.</p>
+      <pre>Workers(thread1, thread2).addClass('fanclub');
+Workers('.fanclub').run('cheers', "Woooo!", "Yeah!");</pre>
+      <p>You can also remove a class or check for existence, jQuery-style:</p>
+      <pre>thread.addClass('class'); // Add
+thread.hasClass('class'); // => true
+thread.removeClass('class'); // Remove
+thread.hasClass('class'); // => false</pre>
+      <h2>Weapon of mass creation</h2>
+      <p>If you want to have 6 workers crunching numbers, it's a pain to create
+      them individually. So there's a helper for that:</p>
+      <pre>Workers().create(6).addClass('crunch');</pre>
+      <p>What have we done? We've gotten an empty set, added 6 new workers to
+      it, and finally tagged them with the <code>crunch</code> class. Ready for
+      further use.</p>
+      <h2>Workerset manipulation</h2>
+      <pre>// Add...
+Workers('.furry').add(a_thread)...
+Workers('.furry').add('.mammals')...
+
+// Remove...
+Workers('.furry').remove(a_thread)...
+Workers('.furry').remove('.rodents')...
+
+// Get the first non-rodent furry...
+Workers('.furry').remove('.rodents').get(0);
+
+// This is a mice trap:
+Workers('.furry.rodents').destroy();</pre>
+      
+      <h1>Pub/Sub</h1>
+      <p>Coming soon... proposed API:</p>
+      <pre>Workers.pub('channel', data);
+Workers.sub('channel', function (data) {});</pre>
+      
+      <h1>From people, to people</h1>
+      <p>DynWorker is currently in its second iteration, beta-stage. It's dev'd
+      by <a href="http://passcod.net" rel="author">F&eacute;lix Saparelli</a> and
+      is open-source (<a href="http://passcod.mit-license.org">MIT</a>). Go check
+      it out on <a href="https://github.com/passcod/DynWorker">GitHub</a>.</p>
+      
+      <h2>Colophon</h2>
       <p>The headers' font is <a href="http://www.google.com/webfonts/specimen/Passero+One">Passero One</a>
       by Viktoriya Grabowska.</p>
     </article>
