@@ -1,6 +1,8 @@
 DynWorker
 =========
 
+[![Gittip](http://stuff.passcod.net/gittip.png)](https://www.gittip.com/passcod/)
+
 **DynWorker** is a lowish-level library designed to make threading fun.
 
 ## The Five-or-so Pillars
