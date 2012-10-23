@@ -136,4 +136,4 @@ stuff &ndash; and some crappy things, too :)
 
 You are just passing, but if you've read until the very end, then I'm pretty
 sure I like you. So I'll give you all this, for
-[free (which is written Em-Aye-Tee)](http://passcod.mit-license.org).
+[free (which is written P-U-B-L-I-C-D-O-M-A-I-N-M-O-T-H-E-R-F-U-C-K-E-R)](http://unlicense.org).
