@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/passcod/DynWorker.png)](http://travis-ci.org/passcod/DynWorker)
 DynWorker
 =========
 
