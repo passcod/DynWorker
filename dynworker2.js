@@ -13,7 +13,7 @@
    * https://passcod.net/license.html
   */
 
-  var DynWorker, Workers,
+  var DynWorker, Workers, req,
     __slice = [].slice;
 
   if (typeof window === "undefined") {
@@ -213,6 +213,36 @@
 
   })();
 
-  DynWorker.self = "";
+  /*
+   * To have DynWorker work properly, the script
+   * tag that loads it needs to have an HTML5
+   * `data-dynworker` attribute on it. See the
+   * README for markup and async examples.
+  */
+
+
+  DynWorker.file || (DynWorker.file = document.querySelector("script[data-dynworker]").src);
+
+  DynWorker.readies = [];
+
+  DynWorker.ready = function(cbk) {
+    return DynWorker.readies.push(cbk);
+  };
+
+  req = new XMLHttpRequest();
+
+  req.open("GET", DynWorker.file, true);
+
+  req.onreadystatechange(function(e) {
+    if (req.readyState === 4 && req.status === 200) {
+      DynWorker.self = "javascript:" + req.responseText;
+      DynWorker.readies.forEach(function(cbk) {
+        return cbk();
+      });
+      return DynWorker.ready = function(fn) {
+        return fn();
+      };
+    }
+  });
 
 }).call(this);

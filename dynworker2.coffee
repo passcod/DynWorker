@@ -147,4 +147,20 @@ class DynWorker
   listen: (callback) ->
     listeners.push callback
 
-DynWorker.self = "" # Need to get ourselves into this
+
+###
+ * To have DynWorker work properly, the script
+ * tag that loads it needs to have an HTML5
+ * `data-dynworker` attribute on it. See the
+ * README for markup and async examples.
+###
+DynWorker.file ||= document.querySelector("script[data-dynworker]").src
+DynWorker.readies = []
+DynWorker.ready = (cbk) -> DynWorker.readies.push cbk
+req = new XMLHttpRequest()
+req.open "GET", DynWorker.file, true
+req.onreadystatechange (e) ->
+  if req.readyState == 4 && req.status == 200
+    DynWorker.self = "javascript:#{req.responseText}"
+    DynWorker.readies.forEach (cbk) -> cbk()
+    DynWorker.ready = (fn) -> fn()
