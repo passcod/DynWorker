@@ -1,19 +1,24 @@
 DynWorker
 =========
 
-[![Gittip](http://stuff.passcod.net/gittip.png)](https://www.gittip.com/passcod/)
+[![Please donate for my time](http://stuff.passcod.net/gittip.png)](https://www.gittip.com/passcod/)
 
 **DynWorker** is a lowish-level library designed to make threading fun.
 
 ## The Five-or-so Pillars
 
-    DynWorker.file = '/dynworker.min.js';
-    var thread = new DynWorker;
+    DynWorker.ready(function () {
+      var thread = new DynWorker;
+    });
 
-You do not need to specify a file anymore. You specify once which file
-contains **DynWorker**, and we use that. A requirement, however, is that
-this file should not be concatenated with anything else unless you know
-exactly what you're doing.
+You do not need to specify a file anymore. You specify a `data-` attribute
+on the `<script>` tag which loads DynWorker, and we use that, even if it's
+accross domains. A requirement, however, is that this file should not be
+concatenated with anything else unless you know exactly what you're doing.
+
+Because the file is loaded via XHR, make sure to use the `DynWorker.ready`
+wrap function before you attempt to create workers: it'll run immediately
+if we're good to go, and will queue the code otherwise.
 
 ---
 
@@ -29,7 +34,7 @@ to commit seppuku, while the second just guillotines it on-the-spot.
 
 You can `push` data into a worker. This will store the data directly onto
 the worker's global object, so you might want to do some namespacing on the
-name (e.g. `'ns.name'`). Or not &ndash; you decide. The data can be any of:
+name (e.g. `'ns.name'`). Or not &mdash; you decide. The data can be any of:
 
   + String
   + Number
@@ -73,7 +78,7 @@ All these methods are also available from within a worker on the special
 `parent_thread` global. They reverse the roles and allow data and code to be pushed,
 pulled, ran, and evaluated in the parent thread _from the worker_. (This is
 potentially very dangerous if you allow unchecked code to run within a worker.
-So don't.)
+So don't.) (***Removed*** for the moment, might come back later.)
 
 
 ## You, you, and you
@@ -129,11 +134,11 @@ Pub/Sub for threading! What will they think of next?
 Me & Thee
 =========
 
-Hiya! I'm Félix Saparelli, also known as [passcod](http://passcod.net). I lurk
-in the streets of Auckland (and some other places), New Zealand, as well as on
+Hiya! I'm Félix Saparelli, also known as [passcod](https://passcod.net). I lurk
+on the streets of Auckland (and some other places), New Zealand, as well as on
 [Twitter](https://twitter.com/passcod). I land some cool Javascript and Ruby
-stuff &ndash; and some crappy things, too :)
+stuff &mdash; and some crappy things, too :)
 
 You are just passing, but if you've read until the very end, then I'm pretty
-sure I like you. So I'll give you all this, for
-[free (which is written P-U-B-L-I-C-D-O-M-A-I-N-M-O-T-H-E-R-F-U-C-K-E-R)](http://unlicense.org).
+sure I like you. So I'll give you all this, for free, fully free (freedoms be
+damned!). This work is released in the [Public Domain](https://passcod.net/license.html).

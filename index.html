@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="demo/style.css" />
     <link rel="stylesheet" href="demo/prettyprint.css" />
     <link rel="stylesheet" href="demo/sandbox.css" />
-    <script src="dynworker.js"></script>
+    <script src="dynworker.js" data-dynworker></script>
   </head>
   <body>
     <header>
@@ -17,7 +17,7 @@
     <div id="sandbox">sandbox loading...</div>
     <article>
       <p>The above <a href="http://josscrowcroft.github.com/javascript-sandbox-console/">sandbox</a>
-      is already set up with the correct <code>dynworker.js</code> path, so you can just dive in.</p>
+      is already set up, so you can just dive in.</p>
       <p>Be aware that there's some functions documented below that are not implemted yet.</p>
       
       <h1>Single-player Pong</h1>
@@ -112,10 +112,10 @@ Workers('.furry.rodents').destroy();</pre>
 Workers.sub('channel', function (data) {});</pre>
       
       <h1>From people, to people</h1>
-      <p>DynWorker is currently in its second iteration, beta-stage. It's dev'd
-      by <a href="http://passcod.net" rel="author">F&eacute;lix Saparelli</a> and
-      is open-source (<a href="http://passcod.mit-license.org">MIT</a>). Go check
-      it out on <a href="https://github.com/passcod/DynWorker">GitHub</a>.</p>
+      <p>DynWorker is currently in its third iteration, RC. It's developed with love
+      by <a href="https://passcod.net" rel="author">F&eacute;lix Saparelli</a> and
+      is open-source (<a href="https://passcod.net/license.html">Public Domain</a>).
+      Go check it out on <a href="https://github.com/passcod/DynWorker">GitHub</a>.</p>
       
       <h2>Colophon</h2>
       <p>The headers' font is <a href="http://www.google.com/webfonts/specimen/Passero+One">Passero One</a>
@@ -146,15 +146,16 @@ Workers.sub('channel', function (data) {});</pre>
     <script src="demo/sandbox-console.js"></script>
     <script>
 	    jQuery(function($) {
-		    // Create the sandbox:
-		    window.sandbox = new Sandbox.View({
-			    el : $('#sandbox'),
-			    model : new Sandbox.Model(),
-			    tabCharacter: '  '
+		    DynWorker.ready(function () {
+		      // Create the sandbox:
+		      window.sandbox = new Sandbox.View({
+			      el : $('#sandbox'),
+			      model : new Sandbox.Model(),
+			      tabCharacter: '  '
+		      });
 		    });
 		    
 		    $('article pre:not(.no-prettyprint)').addClass('prettyprint');
-		    
 		    prettyPrint();
 	    });
     </script>

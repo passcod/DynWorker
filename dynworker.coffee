@@ -1,7 +1,7 @@
 "use strict"
 ###* DynWorker
  *
- * Ver: 2.0.0
+ * Ver: 2.0.0-pre
  * Who: Félix Saparelli
  * Web: https://passcod.net/DynWorker
  * Git: https://github.com/passcod/DynWorker
@@ -15,6 +15,7 @@ if typeof window == "undefined"
     cmds = e.data.split ":", 3
     
     if cmds[0] == "DynWorker"
+      # Need some input handling here
       msg = JSON.parse cmds[2]
       switch cmds[1]
         when "eval"
@@ -158,9 +159,13 @@ DynWorker.file ||= document.querySelector("script[data-dynworker]").src
 DynWorker.readies = []
 DynWorker.ready = (cbk) -> DynWorker.readies.push cbk
 req = new XMLHttpRequest()
-req.open "GET", DynWorker.file, true
-req.onreadystatechange (e) ->
-  if req.readyState == 4 && req.status == 200
-    DynWorker.self = "javascript:#{req.responseText}"
+req.onreadystatechange = (e) ->
+  if req.readyState == 4 && (req.status == 200 || req.status == 304)
+    DynWorker.self = "data:text/javascript;base64,#{btoa req.responseText}"
     DynWorker.readies.forEach (cbk) -> cbk()
     DynWorker.ready = (fn) -> fn()
+req.open "GET", DynWorker.file, true
+req.send null
+
+@DynWorker = DynWorker
+@Workers = Workers
