@@ -1,7 +1,9 @@
 DynWorker
 =========
 
-[![Please donate for my time](http://stuff.passcod.net/gittip.png)](https://www.gittip.com/passcod/)
+[![Donate](http://stuff.passcod.net/gittip.png)](https://www.gittip.com/passcod/) 
+[![Build Status](https://travis-ci.org/passcod/DynWorker.png?branch=master)](https://travis-ci.org/passcod/DynWorker)
+
 
 **DynWorker** is a lowish-level library designed to make threading fun.
 

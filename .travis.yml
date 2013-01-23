@@ -1,0 +1,23 @@
+---
+language: node_js
+node_js:
+  - 0.8
+
+before_install:
+# Install CasperJS
+  - "git clone git://github.com/n1k0/casperjs.git"
+  - "cd casperjs"
+  - "git checkout tags/1.0.1"
+  - "sudo ln -sf `pwd`/bin/casperjs /usr/local/bin/casperjs"
+  - "cd .."
+
+before_script:
+  - "npm install -g coffee-script"
+  - "coffee -c dynworker.coffee"    # Don't rely on repo
+
+script:
+  - "casperjs test/core.coffee"         # Basic worker operation
+  - "casperjs test/single.coffee"       # Single-player
+  - "casperjs test/collection.coffee"   # Workers() collections
+  - "casperjs test/many.coffee"         # Many workers + children
+#  - "casperjs test/pubsub.coffee"      # PubSub (501)
