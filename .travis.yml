@@ -19,8 +19,4 @@ before_script:
   - "serve -p 158080 &"
 
 script:
-  - "casperjs test/core.coffee"         # Basic worker operation
-#  - "casperjs test/single.coffee"       # Single-player
-#  - "casperjs test/collection.coffee"   # Workers() collections
-#  - "casperjs test/many.coffee"         # Many workers + children
-#  - "casperjs test/pubsub.coffee"       # PubSub (501)
+  - "casperjs test --direct test"

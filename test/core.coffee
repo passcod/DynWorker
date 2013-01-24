@@ -6,10 +6,14 @@
  * - In-worker-eval
  * - Worker-to-main communication
 ###
-casper = require('casper').create()
+
+var answer = ""
+
+casper.test.comment "Core: creation / forward & backward comms"
 
 casper.on "remote.message", (msg) ->
-  @echo "Page says: #{msg}"
+  @log "Page says: #{msg}"
+  answer = msg
 
 casper.start "http://localhost:158080", ->
   @evaluate ->
@@ -18,5 +22,7 @@ casper.start "http://localhost:158080", ->
     thread.eval "self.test = 'foo';"
     thread.eval "sendMessage('hello world');"
 
+casper.then ->
+  this.test.assertEquals answer, "hello world"
 
-casper.run()
+casper.run -> this.test.done 1
