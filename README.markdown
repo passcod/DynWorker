@@ -1,13 +1,13 @@
 DynWorker
 =========
 
-[![Donate](http://stuff.passcod.net/gittip.png)](https://www.gittip.com/passcod/) 
+[![Tip Me](http://stuff.passcod.net/gittip.png)](https://www.gittip.com/passcod/) 
 [![Build Status](https://travis-ci.org/passcod/DynWorker.png?branch=master)](https://travis-ci.org/passcod/DynWorker)
 
 
 **DynWorker** is a lowish-level library designed to make threading fun.
 
-## The Five-or-so Pillars
+## Starting off alone
 
     DynWorker.ready(function () {
       var thread = new DynWorker;
@@ -77,10 +77,10 @@ You can `eval` code in the worker.
 ---
 
 All these methods are also available from within a worker on the special
-`parent_thread` global. They reverse the roles and allow data and code to be pushed,
+`Parent` global. They reverse the roles and allow data and code to be pushed,
 pulled, ran, and evaluated in the parent thread _from the worker_. (This is
 potentially very dangerous if you allow unchecked code to run within a worker.
-So don't.) (***Removed*** for the moment, might come back later.)
+So don't.)
 
 
 ## You, you, and you
@@ -122,7 +122,7 @@ matching workers, and get a single worker from the lot:
     // This is a mice trap:
     Workers('.furry.rodents').destroy();
 
-
+<!--
 ## We are Legion
 
 Two more goodies (will, soon) make stuff even more interesting:
@@ -131,7 +131,7 @@ Two more goodies (will, soon) make stuff even more interesting:
     Workers.sub('channel', function (data) {});
 
 Pub/Sub for threading! What will they think of next?
-
+-->
 
 Me & Thee
 =========

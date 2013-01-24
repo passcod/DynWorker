@@ -10,27 +10,6 @@
  * https://passcod.net/license.html
 ###
 
-if typeof window == "undefined"
-  self.addEventListener "message", (e) ->
-    cmds = e.data.split ":", 3
-    
-    if cmds[0] == "DynWorker"
-      # Need some input handling here
-      msg = JSON.parse cmds[2]
-      switch cmds[1]
-        when "eval"
-          eval.call self, msg
-        when "data"
-          self[msg.name] = msg.data
-        when "function"
-          eval.call self, "self.#{msg.name} = #{msg.source};"
-        when "pull"
-          eval.call self, "self.postMessage('DynWorker:callback:'+" +
-            "JSON.stringify({" +
-              "callback:#{msg.callback}," +
-              "args:[self.#{msg.name}]" +
-            "}));"
-  , false
 
 Workers = (args...) ->
   select = (sel) ->
@@ -77,12 +56,11 @@ class Workers.wrap
     @selection[n]
 
 class DynWorker
-  constructor: ->
+  constructor: (@metal = new Worker DynWorker.self) ->
     @classes = []
     @callbacks = []
     @listeners = []
     
-    @metal = new Worker DynWorker.self
     Workers.all.push @
     @metal.addEventListener "message", (e) ->
       msg = e.data
@@ -149,23 +127,68 @@ class DynWorker
     listeners.push callback
 
 
-###
- * To have DynWorker work properly, the script
- * tag that loads it needs to have an HTML5
- * `data-dynworker` attribute on it. See the
- * README for markup and async examples.
-###
-DynWorker.file ||= document.querySelector("script[data-dynworker]").src
-DynWorker.readies = []
-DynWorker.ready = (cbk) -> DynWorker.readies.push cbk
-req = new XMLHttpRequest()
-req.onreadystatechange = (e) ->
-  if req.readyState == 4 && (req.status == 200 || req.status == 304)
-    DynWorker.self = "data:text/javascript;base64,#{btoa req.responseText}"
-    DynWorker.readies.forEach (cbk) -> cbk()
-    DynWorker.ready = (fn) -> fn()
-req.open "GET", DynWorker.file, true
-req.send null
+# Simple queue for functions
+# to be run whenever DynWorker
+# is ready or immediately once
+# it is.
+readies  = []
+DynWorker.ready = (cbk) -> readies.push cbk
+were_ready = ->
+  readies.forEach (cbk) -> cbk()
+  DynWorker.ready = (fn) -> fn()
 
+
+if typeof window == "undefined"
+  # Have a way to call back up
+  self.Parent = new DynWorker self
+  Workers.all.pop()
+
+  # If this is loading from within a worker,
+  # we will have to ask the parent thread
+  # for its copy of ourselves.
+  Parent.pull "DynWorker.self", (us) ->
+    DynWorker.self = us
+    were_ready()
+else
+  # This is actually useful. Honest.
+  window.self = window
+  
+  # To have DynWorker work properly, the script
+  # tag that loads it needs to have an HTML5
+  # `data-dynworker` attribute on it. See the
+  # README for markup and async examples.
+  DynWorker.file ||= document.querySelector("script[data-dynworker]").src
+  req = new XMLHttpRequest()
+  req.onreadystatechange = (e) ->
+    if req.readyState == 4 && (req.status == 200 || req.status == 304)
+      DynWorker.self = "data:text/javascript;base64,#{btoa req.responseText}"
+      were_ready()
+  req.open "GET", DynWorker.file, true
+  req.send null
+
+
+self.addEventListener "message", (e) ->
+  cmds = e.data.split ":", 3
+  
+  if cmds[0] == "DynWorker"
+    # Need some input handling here
+    msg = JSON.parse cmds[2]
+    switch cmds[1]
+      when "eval"
+        eval.call self, msg
+      when "data"
+        self[msg.name] = msg.data
+      when "function"
+        eval.call self, "self.#{msg.name} = #{msg.source};"
+      when "pull"
+        eval.call self, "self.postMessage('DynWorker:callback:'+" +
+          "JSON.stringify({" +
+            "callback:#{msg.callback}," +
+            "args:[self.#{msg.name}]" +
+          "}));"
+, false
+
+
+# Export
 @DynWorker = DynWorker
 @Workers = Workers
