@@ -1,0 +1,3 @@
+[submodule "libworker"]
+	path = libworker
+	url = git://github.com/passcod/libworker.js.git
