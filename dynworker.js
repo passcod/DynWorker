@@ -12,7 +12,7 @@
 
 
 (function() {
-  var root;
+  var Thread, root;
 
   root = this;
 
@@ -59,5 +59,16 @@
    * https://passcod.net/license.html
   */
 
+
+  Thread = (function() {
+
+    function Thread() {
+      this.worker = new libworker;
+      this.worker["eval"]("self.onmessage = function (e) {  if (e.data.slice(0,5) !== 'dyno:') return;  var data = e.data.slice(5);  };");
+    }
+
+    return Thread;
+
+  })();
 
 }).call(this);

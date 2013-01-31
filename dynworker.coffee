@@ -10,3 +10,13 @@
 ###
 
 
+class Thread
+  constructor: ->
+    @worker = new libworker
+    @worker.eval "
+self.onmessage = function (e) {
+  if (e.data.slice(0,5) !== 'dyno:') return;
+  var data = e.data.slice(5);
+
+  
+};"
