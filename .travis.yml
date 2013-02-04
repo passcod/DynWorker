@@ -15,7 +15,6 @@ before_install:
   - "cd .."
 
 before_script:
-  - "coffee -c dynworker.coffee"    # Don't rely on repo
   - "serve -p 158080 &"
 
 script:

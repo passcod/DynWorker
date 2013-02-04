@@ -64,7 +64,7 @@
 
     function Thread() {
       this.worker = new libworker;
-      this.worker["eval"]("self.onmessage = function (e) {  if (e.data.slice(0,5) !== 'dyno:') return;  var data = e.data.slice(5);  };");
+      this.worker["eval"]("self.onmessage = function (e) {  if (e.data.slice(0,5) !== 'dyno:') return;  var data = JSON.parse(e.data.slice(5));  if (data['a'] === 'new_actor') {  }};");
     }
 
     return Thread;
