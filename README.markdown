@@ -88,4 +88,4 @@ $.localStorage.getItem("key", function(data) {
 The License
 -----------
 
-DynWorker is licensed under this [MIT License](http://mit.passcod.net).
+DynWorker is licensed under this [MIT License](http://passcod.mit-license.org).
