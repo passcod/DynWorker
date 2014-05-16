@@ -13,10 +13,9 @@ DynWorker contains a few utilities to augment your worker. You can easily inject
 functions into the worker, run arbitrary code, pass messages containing mixed
 data (everything is JSON-encoded), and access DOM storage (local and session).
 
-Future developments may include being able to clone workers, access the DOM asynchronously,
-make full XHR requests (including XML parsing), access the indexedDB directly from
-the worker, and/or (un)serialize a worker.
-
+Development has stopped and DynWorker hasn't been updated in at least three years,
+but it still works fine and is used in the wild. Pull requests, bug reports, and
+other questions are very welcome. Take care and have fun!
 
 The Code
 --------
