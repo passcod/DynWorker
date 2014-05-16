@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/passcod/DynWorker.svg?branch=master)](https://travis-ci.org/passcod/DynWorker)
-[![NPM version](https://badge.fury.io/js/DynWorker.svg)](http://npmjs.org/package/dynworker)
+[![NPM version](https://badge.fury.io/js/DynWorker.svg)](http://npmjs.org/package/DynWorker)
 
 DynWorker
 =========
