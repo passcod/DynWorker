@@ -4,6 +4,8 @@
 DynWorker
 =========
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/passcod/DynWorker.svg)](https://greenkeeper.io/)
+
 
 The Talk
 --------
